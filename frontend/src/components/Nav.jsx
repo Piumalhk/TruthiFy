@@ -3,7 +3,7 @@ import logo from "../assets/logo.png";
 
 export default function Nav() {
   return (
-    <nav className="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top">
+    <nav className="navbar navbar-expand-lg navbar-dark shadow-sm sticky-top">
     
       <div className="container">
         {/* Logo */}
@@ -37,13 +37,13 @@ export default function Nav() {
         >
           <ul className="navbar-nav">
             <li className="nav-item">
-              <a className="nav-link text-dark hover-primary px-3" href="/">
+              <a className="nav-link hover-primary px-3" href="/">
                 Home
               </a>
             </li>
             <li className="nav-item">
               <a
-                className="nav-link text-dark hover-primary px-3"
+                className="nav-link  hover-primary px-3"
                 href="/about"
               >
                 About
@@ -51,7 +51,7 @@ export default function Nav() {
             </li>
             <li className="nav-item">
               <a
-                className="nav-link text-dark hover-primary px-3"
+                className="nav-link  hover-primary px-3"
                 href="/services"
               >
                 Services
@@ -59,7 +59,7 @@ export default function Nav() {
             </li>
             <li className="nav-item">
               <a
-                className="nav-link text-dark hover-primary px-3"
+                className="nav-link  hover-primary px-3"
                 href="/history"
               >
                 History
@@ -67,7 +67,9 @@ export default function Nav() {
             </li>
           </ul>
         </div>
-        <button className="btn btn-primary px-4 rounded-pill ">Sign Up</button>
+        <a href="/signup">
+          <button className="btn btn-primary px-4 rounded-pill ">Sign Up</button>
+        </a>
       </div>
     </nav>
   );

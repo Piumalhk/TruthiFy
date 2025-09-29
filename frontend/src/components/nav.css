@@ -5,6 +5,7 @@ body {
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  font-size: 20px;
 }
 
 /* Logo styling */
@@ -27,7 +28,6 @@ body {
 
 /* Custom navbar styling */
 .navbar {
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .navbar-brand:hover {
@@ -38,11 +38,28 @@ body {
 .nav-link {
   transition: all 0.3s ease-in-out;
   border-radius: 0.375rem;
+  color: #1c1a1a;
+ font-weight: 500;
+margin-left: 10px;
+
 }
 
-.nav-link:hover {
-  background-color: rgba(13, 110, 253, 0.1);
-}
+
  .navbar{
-    height: 80px;
+    height: 75px;
+   background: none;
+   color: #1b1a1a;
+   width: 1525px;
+   
+   background: linear-gradient(90deg, #d6dae2 0%, #dee1e7 100%)
+
  }
+
+ .btn{
+  font-weight: 500;
+  
+ }
+
+  
+
+    
