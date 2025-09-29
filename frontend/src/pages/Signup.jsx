@@ -54,20 +54,13 @@ export default function Signup() {
               <div className="card-body p-5">
                 {/* Header */}
                 <div className="text-center mb-4">
-                  <h2 className="fw-bold text-primary mb-2">TruthiFy</h2>
+                  
                   <h4 className="fw-bold mb-3">Create Account</h4>
-                  <p className="text-muted">
-                    Join us to start detecting fake news
-                  </p>
+                 
                 </div>
 
                 {/* Back to Home Button */}
-                <div className="mb-3">
-                  <Link to="/" className="btn btn-outline-secondary w-100">
-                    <i className="fas fa-home me-2"></i>
-                    Back to Home
-                  </Link>
-                </div>
+              
 
                 {/* Error Message */}
                 {error && (
@@ -79,16 +72,11 @@ export default function Signup() {
                 {/* Signup Form */}
                 <form onSubmit={handleSubmit}>
                   {/* Username */}
-                  <div className="mb-3">
-                    <label
-                      htmlFor="username"
-                      className="form-label fw-semibold"
-                    >
-                      Username
-                    </label>
+                  <div className="mb-4">
+                  
                     <input
                       type="text"
-                      className="form-control form-control-lg"
+                      className="form-control form-control-lg fs-6"
                       id="username"
                       name="username"
                       value={formData.username}
@@ -99,22 +87,33 @@ export default function Signup() {
                   </div>
 
                   {/* Password */}
-                  <div className="mb-4">
-                    <label
-                      htmlFor="password"
-                      className="form-label fw-semibold"
-                    >
-                      Password
-                    </label>
+                  <div className="mb-3">
+                 
                     <input
                       type="password"
-                      className="form-control form-control-lg"
+                      className="form-control form-control-lg fs-6"
                       id="password"
                       name="password"
                       value={formData.password}
                       onChange={handleInputChange}
                       placeholder="Enter your password"
                       required
+                      
+                    />
+                  </div>
+
+                     <div className="mb-3">
+                
+                    <input
+                      type="password"
+                      className="form-control form-control-lg fs-6"
+                      id="password"
+                      name="password"
+                      value={formData.password}
+                      onChange={handleInputChange}
+                      placeholder="Confirm your password"
+                      required
+                      
                     />
                   </div>
 
@@ -138,17 +137,29 @@ export default function Signup() {
                   </button>
 
                   {/* Login Link */}
-                  <div className="text-center">
-                    <p className="text-muted mb-0">
+                  
+                  <div className="text-center ">
+                    <p className="text-muted mb-0 fs-6">
                       Already have an account?
                       <Link
                         to="/login"
                         className="text-primary text-decoration-none fw-semibold ms-1"
                       >
-                        Login here
+                        Login 
                       </Link>
                     </p>
                   </div>
+                  <div className="text-center ">
+                    <p className="text-muted mb-0 fs-6">
+                      <Link
+                        to="/"
+                        className="text-primary text-decoration-none ms-1 "
+                      >
+                        Back to Home
+                      </Link>
+                    </p>
+                  </div>
+                
                 </form>
               </div>
             </div>

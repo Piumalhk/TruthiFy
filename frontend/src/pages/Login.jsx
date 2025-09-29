@@ -54,18 +54,12 @@ export default function Login() {
               <div className="card-body p-5">
                 {/* Header */}
                 <div className="text-center mb-4">
-                  <h2 className="fw-bold text-primary mb-2">TruthiFy</h2>
+                
                   <h4 className="fw-bold mb-3">Welcome Back</h4>
-                  <p className="text-muted">Sign in to your account</p>
+                  
                 </div>
 
-                {/* Back to Home Button */}
-                <div className="mb-3">
-                  <Link to="/" className="btn btn-outline-secondary w-100">
-                    <i className="fas fa-home me-2"></i>
-                    Back to Home
-                  </Link>
-                </div>
+              
 
                 {/* Error Message */}
                 {error && (
@@ -78,15 +72,10 @@ export default function Login() {
                 <form onSubmit={handleSubmit}>
                   {/* Username */}
                   <div className="mb-3">
-                    <label
-                      htmlFor="username"
-                      className="form-label fw-semibold"
-                    >
-                      Username
-                    </label>
+               
                     <input
                       type="text"
-                      className="form-control form-control-lg"
+                      className="form-control form-control-lg fs-6"
                       id="username"
                       name="username"
                       value={formData.username}
@@ -98,15 +87,10 @@ export default function Login() {
 
                   {/* Password */}
                   <div className="mb-4">
-                    <label
-                      htmlFor="password"
-                      className="form-label fw-semibold"
-                    >
-                      Password
-                    </label>
+                   
                     <input
                       type="password"
-                      className="form-control form-control-lg"
+                      className="form-control form-control-lg fs-6"
                       id="password"
                       name="password"
                       value={formData.password}
@@ -136,7 +120,7 @@ export default function Login() {
                   </button>
 
                   {/* Signup Link */}
-                  <div className="text-center">
+                  <div className="text-center fs-6">
                     <p className="text-muted mb-0">
                       Don't have an account?
                       <Link
@@ -147,6 +131,16 @@ export default function Login() {
                       </Link>
                     </p>
                   </div>
+                 <div className="text-center ">
+                                  <p className="text-muted mb-0 fs-6">
+                                    <Link
+                                      to="/"
+                                      className="text-primary text-decoration-none ms-1 "
+                                    >
+                                      Back to Home
+                                    </Link>
+                                  </p>
+                                </div>
                 </form>
               </div>
             </div>
