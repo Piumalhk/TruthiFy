@@ -4,6 +4,7 @@ import Home from "./pages/Home";
 import Newsenter from "./pages/Newsenter";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
+import History from "./pages/History";
 
 export default function App() {
   return (
@@ -14,6 +15,7 @@ export default function App() {
         <Route path="/services" element={<Newsenter />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
+        <Route path="/history" element={<History />} />
       </Routes>
     </Router>
   );

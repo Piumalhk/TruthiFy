@@ -44,7 +44,7 @@ export default function Nav() {
             <li className="nav-item">
               <a
                 className="nav-link  hover-primary px-3"
-                href="/about"
+                href="/#about-section"
               >
                 About
               </a>

@@ -91,18 +91,16 @@ export default function Home() {
         </div>
       </section>
 
-   
-
 
     
       {/* Footer */}
       <footer className="footer bg-dark text-white py-5">
-        <div className="container">
+        <div className="container h-auto">
           <div className="row">
             <div className="col-lg-4 mb-4">
               <h5 className="fw-bold mb-3">TruthiFy</h5>
-              <p className="text-light">
-                Empowering individuals, organizations, and communities with cutting-edge AI-driven tools to identify, combat, and prevent the spread of misinformation in our increasingly connected digital world. Together, we're building a more informed society.
+              <p className="text-light w-55">
+           We empower people and communities with AI tools to combat misinformation and build a more informed society.
               </p>
               <div className="social-links">
                 <a href="#" className="text-white me-3">
@@ -127,27 +125,26 @@ export default function Home() {
                 <li><a href="/about" className="text-light text-decoration-none">About</a></li>
                 <li><a href="/services" className="text-light text-decoration-none">Services</a></li>
                 <li><a href="/history" className="text-light text-decoration-none">History</a></li>
-                <li><a href="/pricing" className="text-light text-decoration-none">Pricing</a></li>
-                <li><a href="/blog" className="text-light text-decoration-none">Blog</a></li>
+               
               </ul>
             </div>
 
             <div className="col-lg-2 col-md-6 mb-4">
               <h6 className="fw-bold mb-3">Support</h6>
               <ul className="list-unstyled">
-                <li><a href="#" className="text-light text-decoration-none">Help Center</a></li>
+              
                 <li><a href="#" className="text-light text-decoration-none">Contact Us</a></li>
                 <li><a href="#" className="text-light text-decoration-none">FAQ</a></li>
                 <li><a href="#" className="text-light text-decoration-none">Privacy Policy</a></li>
                 <li><a href="#" className="text-light text-decoration-none">Terms of Service</a></li>
-                <li><a href="#" className="text-light text-decoration-none">API Documentation</a></li>
+
               </ul>
             </div>
 
             <div className="col-lg-4 mb-4">
               <h6 className="fw-bold mb-3">Stay Updated</h6>
               <p className="text-light">
-                Subscribe to our newsletter for the latest updates on fake news detection technology, industry insights, research findings, and tips for identifying misinformation in your daily digital consumption.
+                Subscribe to our newsletter for the latest updates on fake news detection. 
               </p>
               <div className="input-group">
                 <input
