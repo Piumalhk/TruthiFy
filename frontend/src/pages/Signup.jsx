@@ -1,12 +1,19 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+
+const API_BASE_URL = "http://localhost:8000/api/v1";
 
 export default function Signup() {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     username: "",
+    email: "",
+    full_name: "",
     password: "",
+    confirmPassword: "",
   });
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   const handleInputChange = (e) => {
@@ -17,24 +24,71 @@ export default function Signup() {
     }));
     setError(""); // Clear error when user types
   };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
+    setSuccess("");
 
-    if (!formData.username.trim() || !formData.password.trim()) {
-      setError("Please fill in both username and password");
+    // Validation
+    if (
+      !formData.username.trim() ||
+      !formData.email.trim() ||
+      !formData.full_name.trim() ||
+      !formData.password.trim() ||
+      !formData.confirmPassword.trim()
+    ) {
+      setError("Please fill in all fields");
+      return;
+    }
+
+    if (formData.password !== formData.confirmPassword) {
+      setError("Passwords do not match");
+      return;
+    }
+
+    if (formData.password.length < 6) {
+      setError("Password must be at least 6 characters long");
       return;
     }
 
     setIsLoading(true);
 
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      alert("Account created successfully!");
-      setFormData({ username: "", password: "" });
+      const response = await fetch(`${API_BASE_URL}/auth/register`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          username: formData.username,
+          email: formData.email,
+          full_name: formData.full_name,
+          password: formData.password,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setSuccess("Account created successfully! Redirecting to login...");
+        setFormData({
+          username: "",
+          email: "",
+          full_name: "",
+          password: "",
+          confirmPassword: "",
+        });
+
+        // Redirect to login page after 2 seconds
+        setTimeout(() => {
+          navigate("/login");
+        }, 2000);
+      } else {
+        setError(data.detail || "Failed to create account. Please try again.");
+      }
     } catch (error) {
-      setError("Failed to create account. Please try again.");
+      console.error("Signup error:", error);
+      setError("Network error. Please check your connection and try again.");
     } finally {
       setIsLoading(false);
     }
@@ -54,26 +108,39 @@ export default function Signup() {
               <div className="card-body p-5">
                 {/* Header */}
                 <div className="text-center mb-4">
-                  
                   <h4 className="fw-bold mb-3">Create Account</h4>
-                 
                 </div>
-
                 {/* Back to Home Button */}
-              
-
                 {/* Error Message */}
                 {error && (
                   <div className="alert alert-danger text-center" role="alert">
                     {error}
                   </div>
                 )}
-
-                {/* Signup Form */}
+                {/* Success Message */}
+                {success && (
+                  <div className="alert alert-success text-center" role="alert">
+                    {success}
+                  </div>
+                )}
+                {/* Signup Form */}{" "}
                 <form onSubmit={handleSubmit}>
+                  {/* Full Name */}
+                  <div className="mb-3">
+                    <input
+                      type="text"
+                      className="form-control form-control-lg fs-6"
+                      id="full_name"
+                      name="full_name"
+                      value={formData.full_name}
+                      onChange={handleInputChange}
+                      placeholder="Enter your full name"
+                      required
+                    />
+                  </div>
+
                   {/* Username */}
-                  <div className="mb-4">
-                  
+                  <div className="mb-3">
                     <input
                       type="text"
                       className="form-control form-control-lg fs-6"
@@ -86,9 +153,22 @@ export default function Signup() {
                     />
                   </div>
 
+                  {/* Email */}
+                  <div className="mb-3">
+                    <input
+                      type="email"
+                      className="form-control form-control-lg fs-6"
+                      id="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleInputChange}
+                      placeholder="Enter your email"
+                      required
+                    />
+                  </div>
+
                   {/* Password */}
                   <div className="mb-3">
-                 
                     <input
                       type="password"
                       className="form-control form-control-lg fs-6"
@@ -98,22 +178,20 @@ export default function Signup() {
                       onChange={handleInputChange}
                       placeholder="Enter your password"
                       required
-                      
                     />
                   </div>
 
-                     <div className="mb-3">
-                
+                  {/* Confirm Password */}
+                  <div className="mb-3">
                     <input
                       type="password"
                       className="form-control form-control-lg fs-6"
-                      id="password"
-                      name="password"
-                      value={formData.password}
+                      id="confirmPassword"
+                      name="confirmPassword"
+                      value={formData.confirmPassword}
                       onChange={handleInputChange}
                       placeholder="Confirm your password"
                       required
-                      
                     />
                   </div>
 
@@ -137,7 +215,7 @@ export default function Signup() {
                   </button>
 
                   {/* Login Link */}
-                  
+
                   <div className="text-center ">
                     <p className="text-muted mb-0 fs-6">
                       Already have an account?
@@ -145,7 +223,7 @@ export default function Signup() {
                         to="/login"
                         className="text-primary text-decoration-none fw-semibold ms-1"
                       >
-                        Login 
+                        Login
                       </Link>
                     </p>
                   </div>
@@ -159,7 +237,6 @@ export default function Signup() {
                       </Link>
                     </p>
                   </div>
-                
                 </form>
               </div>
             </div>

@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+﻿from datetime import datetime, timedelta
 from typing import Optional, List
 from .database import get_database
 from .models import UserCreate, NewsAnalysis
@@ -219,4 +219,19 @@ class AnalysisService:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
                 detail="Failed to fetch analysis"
+            )
+
+    async def clear_user_history(self, user_id: str):
+        """Clear all analysis history for a user"""
+        db = await self.get_db()
+        
+        try:
+            result = await db.analyses.delete_many({"user_id": user_id})
+            logger.info(f"Cleared {result.deleted_count} analyses for user: {user_id}")
+            return result.deleted_count
+        except Exception as e:
+            logger.error(f"Error clearing user history: {e}")
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Failed to clear user history"
             )

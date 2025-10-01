@@ -1,13 +1,14 @@
 import React, { useState } from "react";
 import Nav from "../components/Nav";
-
+import { useAuth } from "../context/AuthContext";
+import { newsAPI } from "../utils/api";
 
 export default function Newsenter() {
+  const { isAuthenticated } = useAuth();
   const [newsText, setNewsText] = useState("");
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState("");
-
   const handleAnalyze = async () => {
     if (!newsText.trim()) {
       setError("Please enter some news text to analyze");
@@ -17,24 +18,17 @@ export default function Newsenter() {
     setIsAnalyzing(true);
     setError("");
     setResult(null);
-
     try {
-      const response = await fetch("http://localhost:8000/predict", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          text: newsText,
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to analyze news");
+      // Use the appropriate endpoint based on authentication status
+      if (isAuthenticated()) {
+        // Authenticated users - saves to database
+        const data = await newsAPI.analyzeNews(newsText);
+        setResult(data);
+      } else {
+        // Anonymous users - no history saved
+        const data = await newsAPI.analyzeNewsAnonymous(newsText);
+        setResult(data);
       }
-
-      const data = await response.json();
-      setResult(data);
     } catch (err) {
       setError("Error analyzing news. Please try again.");
       console.error("Analysis error:", err);
@@ -60,8 +54,6 @@ export default function Newsenter() {
   return (
     <div>
       <Nav />
-
-
 
       {/* Main Content Section */}
       <section className="news-analysis-section py-5">
@@ -254,7 +246,6 @@ export default function Newsenter() {
                   </div>
                 </div>
               )}
-
             </div>
           </div>
         </div>

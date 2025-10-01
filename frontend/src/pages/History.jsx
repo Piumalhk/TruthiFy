@@ -1,78 +1,72 @@
 import React, { useState, useEffect } from "react";
 import Nav from "../components/Nav";
+import { useAuth } from "../context/AuthContext";
+import { newsAPI } from "../utils/api";
 
 export default function History() {
+  const { user, isAuthenticated } = useAuth();
   const [historyItems, setHistoryItems] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-
-  // Mock data - in a real app, this would come from an API or local storage
+  const [error, setError] = useState("");
+  const [stats, setStats] = useState(null); // Load user's analysis history and stats
   useEffect(() => {
-    // Simulate loading delay
-    setTimeout(() => {
-      const mockHistory = [
-        {
-          id: 1,
-          newsText:
-            "Breaking: Scientists discover new method for detecting misinformation using advanced AI algorithms that can analyze text patterns and cross-reference multiple sources in real-time.",
-          prediction: "REAL",
-          confidence: 0.92,
-          date: new Date("2025-09-30T14:30:00"),
-        },
-        {
-          id: 2,
-          newsText:
-            "SHOCKING: Local man discovers this one weird trick that doctors hate! Click here to learn the secret that pharmaceutical companies don't want you to know.",
-          prediction: "FAKE",
-          confidence: 0.87,
-          date: new Date("2025-09-30T12:15:00"),
-        },
-        {
-          id: 3,
-          newsText:
-            "The government announced new funding for renewable energy projects, allocating $2 billion for solar and wind power infrastructure development across the country.",
-          prediction: "REAL",
-          confidence: 0.89,
-          date: new Date("2025-09-29T16:45:00"),
-        },
-        {
-          id: 4,
-          newsText:
-            "URGENT: Aliens have landed in downtown and are distributing free pizza to everyone! The mayor has declared a state of emergency due to the overwhelming deliciousness.",
-          prediction: "FAKE",
-          confidence: 0.95,
-          date: new Date("2025-09-29T10:20:00"),
-        },
-        {
-          id: 5,
-          newsText:
-            "Research published in Nature journal shows promising results for new cancer treatment, with clinical trials showing 70% improvement in patient outcomes.",
-          prediction: "REAL",
-          confidence: 0.91,
-          date: new Date("2025-09-28T13:10:00"),
-        },
-      ];
-      setHistoryItems(mockHistory);
-      setIsLoading(false);
-    }, 1000);
-  }, []);
+    const loadHistoryAndStats = async () => {
+      if (!isAuthenticated()) {
+        setIsLoading(false);
+        return;
+      }
 
-  const deleteItem = (id) => {
+      try {
+        setError("");
+
+        // Load history and stats in parallel
+        const [historyResponse, statsResponse] = await Promise.all([
+          newsAPI.getHistory(),
+          newsAPI.getStats(),
+        ]);
+
+        setHistoryItems(historyResponse.history || []);
+        setStats(statsResponse);
+      } catch (err) {
+        console.error("Failed to load history:", err);
+        setError("Failed to load analysis history. Please try again.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadHistoryAndStats();
+  }, [isAuthenticated]);
+  const deleteItem = async (id) => {
     if (window.confirm("Are you sure you want to delete this item?")) {
-      setHistoryItems(historyItems.filter((item) => item.id !== id));
+      try {
+        await newsAPI.deleteAnalysis(id);
+        setHistoryItems(historyItems.filter((item) => item.id !== id));
+      } catch (err) {
+        console.error("Failed to delete item:", err);
+        setError("Failed to delete item. Please try again.");
+      }
     }
   };
 
-  const clearAllHistory = () => {
+  const clearAllHistory = async () => {
     if (
       window.confirm(
         "Are you sure you want to clear all history? This action cannot be undone."
       )
     ) {
-      setHistoryItems([]);
+      try {
+        await newsAPI.clearHistory();
+        setHistoryItems([]);
+        setStats({ ...stats, total_analyses: 0, fake_count: 0, real_count: 0 });
+      } catch (err) {
+        console.error("Failed to clear history:", err);
+        setError("Failed to clear history. Please try again.");
+      }
     }
   };
-
-  const formatDate = (date) => {
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
     return date.toLocaleDateString("en-US", {
       year: "numeric",
       month: "short",
@@ -80,7 +74,8 @@ export default function History() {
     });
   };
 
-  const formatTime = (date) => {
+  const formatTime = (dateString) => {
+    const date = new Date(dateString);
     return date.toLocaleTimeString("en-US", {
       hour: "2-digit",
       minute: "2-digit",
@@ -100,7 +95,6 @@ export default function History() {
   return (
     <div>
       <Nav />
-
       {/* Header Section */}
       <section className="history-header bg-light">
         <div className="container">
@@ -125,11 +119,55 @@ export default function History() {
           </div>
           <hr className="mt-3 mb-0" />
         </div>
-      </section>
-
+      </section>{" "}
+      {/* Stats Section */}
+      {stats && (
+        <section className="stats-section bg-white py-4 border-bottom">
+          <div className="container">
+            <div className="row text-center">
+              <div className="col-md-3">
+                <div className="stat-item">
+                  <h3 className="h4 text-primary mb-1">
+                    {stats.total_analyses}
+                  </h3>
+                  <p className="text-muted mb-0">Total Analyses</p>
+                </div>
+              </div>
+              <div className="col-md-3">
+                <div className="stat-item">
+                  <h3 className="h4 text-success mb-1">{stats.real_count}</h3>
+                  <p className="text-muted mb-0">Real News</p>
+                </div>
+              </div>
+              <div className="col-md-3">
+                <div className="stat-item">
+                  <h3 className="h4 text-danger mb-1">{stats.fake_count}</h3>
+                  <p className="text-muted mb-0">Fake News</p>
+                </div>
+              </div>
+              <div className="col-md-3">
+                <div className="stat-item">
+                  <h3 className="h4 text-info mb-1">
+                    {(stats.average_confidence * 100).toFixed(1)}%
+                  </h3>
+                  <p className="text-muted mb-0">Avg Confidence</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      )}
       {/* History Content */}
       <section className="history-content">
         <div className="container">
+          {/* Error Message */}
+          {error && (
+            <div className="alert alert-danger mt-4" role="alert">
+              <i className="fas fa-exclamation-triangle me-2"></i>
+              {error}
+            </div>
+          )}
+
           {isLoading ? (
             // Loading State
             <div className="text-center py-5">
@@ -177,17 +215,17 @@ export default function History() {
                             <small className="text-muted">
                               Confidence: {(item.confidence * 100).toFixed(1)}%
                             </small>
-                          </div>
+                          </div>{" "}
                           <p className="card-text mb-3">
-                            "{truncateText(item.newsText)}"
+                            "{truncateText(item.text)}"
                           </p>
                           <div className="d-flex align-items-center text-muted">
                             <i className="fas fa-calendar me-2"></i>
                             <small className="me-3">
-                              {formatDate(item.date)}
+                              {formatDate(item.analyzed_at)}
                             </small>
                             <i className="fas fa-clock me-2"></i>
-                            <small>{formatTime(item.date)}</small>
+                            <small>{formatTime(item.analyzed_at)}</small>
                           </div>
                         </div>
                         <div className="col-md-4 text-md-end">
@@ -219,9 +257,6 @@ export default function History() {
               ))}
             </div>
           )}
-
-          
-         
         </div>
       </section>
     </div>
