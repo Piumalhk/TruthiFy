@@ -93,8 +93,9 @@ export default function History() {
   };
 
   return (
-    <div>
+    <div >
       <Nav />
+  
       {/* Header Section */}
       <section className="history-header bg-light">
         <div className="container">

@@ -30,7 +30,7 @@ export default function Nav() {
   };
 
   return (
-    <nav className="navbar navbar-expand-lg navbar-dark shadow-sm sticky-top">
+    <nav className="navbar navbar-expand-lg navbar-dark shadow-sm ">
       <div className="container">
         {" "}
         {/* Logo */}
