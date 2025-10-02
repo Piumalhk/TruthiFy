@@ -1,10 +1,10 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-
-const API_BASE_URL = "http://localhost:8000/api/v1";
+import { useAuth } from "../context/AuthContext";
 
 export default function Signup() {
   const navigate = useNavigate();
+  const { register } = useAuth();
   const [formData, setFormData] = useState({
     username: "",
     email: "",
@@ -45,31 +45,28 @@ export default function Signup() {
       setError("Passwords do not match");
       return;
     }
-
     if (formData.password.length < 6) {
       setError("Password must be at least 6 characters long");
       return;
     }
 
+    if (formData.password.length > 72) {
+      setError("Password cannot be longer than 72 characters");
+      return;
+    }
     setIsLoading(true);
 
     try {
-      const response = await fetch(`${API_BASE_URL}/auth/register`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          username: formData.username,
-          email: formData.email,
-          full_name: formData.full_name,
-          password: formData.password,
-        }),
-      });
+      const registrationData = {
+        username: formData.username,
+        email: formData.email,
+        full_name: formData.full_name,
+        password: formData.password,
+      };
 
-      const data = await response.json();
+      const result = await register(registrationData);
 
-      if (response.ok) {
+      if (result.success) {
         setSuccess("Account created successfully! Redirecting to login...");
         setFormData({
           username: "",
@@ -84,7 +81,7 @@ export default function Signup() {
           navigate("/login");
         }, 2000);
       } else {
-        setError(data.detail || "Failed to create account. Please try again.");
+        setError(result.message);
       }
     } catch (error) {
       console.error("Signup error:", error);
@@ -138,7 +135,6 @@ export default function Signup() {
                       required
                     />
                   </div>
-
                   {/* Username */}
                   <div className="mb-3">
                     <input
@@ -152,7 +148,6 @@ export default function Signup() {
                       required
                     />
                   </div>
-
                   {/* Email */}
                   <div className="mb-3">
                     <input
@@ -165,8 +160,7 @@ export default function Signup() {
                       placeholder="Enter your email"
                       required
                     />
-                  </div>
-
+                  </div>{" "}
                   {/* Password */}
                   <div className="mb-3">
                     <input
@@ -176,11 +170,12 @@ export default function Signup() {
                       name="password"
                       value={formData.password}
                       onChange={handleInputChange}
-                      placeholder="Enter your password"
+                      placeholder="Enter your password )"
                       required
+                      maxLength={72}
                     />
-                  </div>
-
+                    
+                  </div>{" "}
                   {/* Confirm Password */}
                   <div className="mb-3">
                     <input
@@ -192,9 +187,9 @@ export default function Signup() {
                       onChange={handleInputChange}
                       placeholder="Confirm your password"
                       required
+                      maxLength={72}
                     />
                   </div>
-
                   {/* Submit Button */}
                   <button
                     type="submit"
@@ -213,9 +208,7 @@ export default function Signup() {
                       "Create Account"
                     )}
                   </button>
-
                   {/* Login Link */}
-
                   <div className="text-center ">
                     <p className="text-muted mb-0 fs-6">
                       Already have an account?

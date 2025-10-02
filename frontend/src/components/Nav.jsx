@@ -1,10 +1,12 @@
 import React from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 import logo from "../assets/logo.png";
 
 export default function Nav() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { user, logout, isAuthenticated } = useAuth();
 
   const handleAboutClick = (e) => {
     e.preventDefault();
@@ -83,13 +85,52 @@ export default function Nav() {
                 History
               </a>
             </li>
-          </ul>
+          </ul>{" "}
         </div>
-        <a href="/signup">
-          <button className="btn btn-primary px-4 rounded-pill ">
-            Sign Up
-          </button>
-        </a>
+        {/* Authentication buttons */}
+        <div className="d-flex align-items-center gap-2">
+          {isAuthenticated() ? (
+            <div className="dropdown">
+              <button
+                className="btn btn-outline-light dropdown-toggle px-3 rounded-pill"
+                type="button"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+              >
+                {user?.username || "User"}
+              </button>
+              <ul className="dropdown-menu dropdown-menu-end">
+                <li>
+                  <Link className="dropdown-item" to="/history">
+                    <i className="bi bi-clock-history me-2"></i>
+                    History
+                  </Link>
+                </li>
+                <li>
+                  <hr className="dropdown-divider" />
+                </li>
+                <li>
+                  <button
+                    className="dropdown-item text-danger"
+                    onClick={logout}
+                  >
+                    <i className="bi bi-box-arrow-right me-2"></i>
+                    Logout
+                  </button>
+                </li>
+              </ul>
+            </div>
+          ) : (
+            <>
+              
+              <Link to="/signup">
+                <button className="btn btn-primary px-4 rounded-pill">
+                  Sign Up
+                </button>
+              </Link>
+            </>
+          )}
+        </div>
       </div>
     </nav>
   );

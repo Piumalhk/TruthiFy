@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from "react";
 
 const AuthContext = createContext();
 
-const API_BASE_URL = "http://localhost:8000/api/auth/register";
+const API_BASE_URL = "http://localhost:8000/api/v1";
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
@@ -25,6 +25,7 @@ export const AuthProvider = ({ children }) => {
           const response = await fetch(`${API_BASE_URL}/auth/me`, {
             headers: {
               Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
             },
           });
 
@@ -47,7 +48,6 @@ export const AuthProvider = ({ children }) => {
 
     checkAuth();
   }, []);
-
   const login = (token, tokenType) => {
     localStorage.setItem("access_token", token);
     localStorage.setItem("token_type", tokenType);
@@ -56,12 +56,40 @@ export const AuthProvider = ({ children }) => {
     fetchUserData();
   };
 
+  const register = async (userData) => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/auth/register`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(userData),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        return { success: true, message: data.message };
+      } else {
+        return {
+          success: false,
+          message: data.detail || "Registration failed",
+        };
+      }
+    } catch (error) {
+      console.error("Registration error:", error);
+      return {
+        success: false,
+        message: "Network error. Please check your connection and try again.",
+      };
+    }
+  };
+
   const logout = () => {
     localStorage.removeItem("access_token");
     localStorage.removeItem("token_type");
     setUser(null);
   };
-
   const fetchUserData = async () => {
     const token = localStorage.getItem("access_token");
     if (token) {
@@ -69,6 +97,7 @@ export const AuthProvider = ({ children }) => {
         const response = await fetch(`${API_BASE_URL}/auth/me`, {
           headers: {
             Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
           },
         });
 
@@ -90,10 +119,10 @@ export const AuthProvider = ({ children }) => {
     const token = localStorage.getItem("access_token");
     return token ? { Authorization: `Bearer ${token}` } : {};
   };
-
   const value = {
     user,
     login,
+    register,
     logout,
     isAuthenticated,
     getAuthHeaders,

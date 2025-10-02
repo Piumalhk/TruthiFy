@@ -1,4 +1,4 @@
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, validator
 from typing import Optional, List, Dict, Any
 from datetime import datetime
 
@@ -17,6 +17,24 @@ class UserCreate(BaseModel):
     email: EmailStr
     full_name: str
     password: str
+
+    @validator('password')
+    def validate_password(cls, v):
+        if len(v) < 6:
+            raise ValueError('Password must be at least 6 characters long')
+        if len(v) > 72:
+            raise ValueError('Password cannot be longer than 72 characters')
+        if len(v.encode('utf-8')) > 72:
+            raise ValueError('Password is too long (exceeds 72 bytes when encoded)')
+        return v
+
+    @validator('username')
+    def validate_username(cls, v):
+        if len(v) < 3:
+            raise ValueError('Username must be at least 3 characters long')
+        if len(v) > 50:
+            raise ValueError('Username cannot be longer than 50 characters')
+        return v
 
     class Config:
         json_schema_extra = {

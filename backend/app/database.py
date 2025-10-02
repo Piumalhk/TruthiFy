@@ -1,57 +1,39 @@
+# app/database.py
+
 from motor.motor_asyncio import AsyncIOMotorClient
-from pymongo import MongoClient
 import os
 from dotenv import load_dotenv
 
 load_dotenv()
 
-MONGODB_URL = os.getenv("MONGODB_URL", "mongodb://localhost:27017")
-DATABASE_NAME = os.getenv("DATABASE_NAME", "Truthify")
+MONGO_URI = os.getenv("MONGO_URI", "mongodb+srv://User:2310d3Xc7SdVkKc1@cluster0.zhboudq.mongodb.net/Truthify?retryWrites=true&w=majority&ssl=true&tlsAllowInvalidCertificates=true")
 
-class Database:
-    client: AsyncIOMotorClient = None
-    database = None
 
-db = Database()
+_db = None  # Global database reference
 
 async def connect_to_mongo():
-    """Create database connection"""
+    """Connect to MongoDB and store the database instance in _db"""
+    global _db
     try:
-        db.client = AsyncIOMotorClient(MONGODB_URL)
-        db.database = db.client[DATABASE_NAME]
-        
-        # Test the connection
-        await db.client.admin.command('ping')
-        print(f"✅ Connected to MongoDB database: {DATABASE_NAME}")
-        
-        # Create indexes for better performance
-        await create_indexes()
-        
+        client = AsyncIOMotorClient(MONGO_URI, serverSelectionTimeoutMS=5000)
+        # Ping the server to verify connection
+        await client.admin.command("ping")
+        _db = client.get_default_database()
+        print("✅ Connected to MongoDB")
     except Exception as e:
         print(f"❌ Error connecting to MongoDB: {e}")
         raise e
 
 async def close_mongo_connection():
-    """Close database connection"""
-    if db.client:
-        db.client.close()
-        print("🔌 Disconnected from MongoDB")
+    """Close MongoDB connection"""
+    global _db
+    if _db is not None:
+        _db.client.close()
+        _db = None
+        print("✅ MongoDB connection closed")
 
 def get_database():
-    """Get database instance"""
-    return db.database
-
-async def create_indexes():
-    """Create database indexes for better performance"""
-    try:
-        # Create indexes for users collection
-        await db.database.users.create_index("username", unique=True)
-        await db.database.users.create_index("email", unique=True)
-        
-        # Create indexes for analyses collection
-        await db.database.analyses.create_index([("user_id", 1), ("analyzed_at", -1)])
-        await db.database.analyses.create_index("analyzed_at")
-        
-        print("✅ Database indexes created successfully")
-    except Exception as e:
-        print(f"⚠️ Warning: Could not create indexes: {e}")
+    """Return the connected MongoDB database"""
+    if _db is None:  # ✅ explicit check
+        raise Exception("Database not connected. Call connect_to_mongo() first.")
+    return _db
