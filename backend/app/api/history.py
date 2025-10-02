@@ -45,8 +45,9 @@ async def get_user_analysis_stats(
         stats = await user_service.get_user_stats(str(current_user["_id"]))
         return StatsResponse(**stats)
     except Exception as e:
-        logger.error(f"Failed to fetch stats: {e}")
+        logger.exception("Failed to fetch stats")
         raise HTTPException(status_code=500, detail="Failed to fetch statistics")
+
 
 @router.get("/{analysis_id}")
 async def get_single_analysis(

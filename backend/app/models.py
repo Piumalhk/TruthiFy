@@ -1,6 +1,9 @@
 from pydantic import BaseModel, EmailStr, validator
 from typing import Optional, List, Dict, Any
 from datetime import datetime
+from pydantic import BaseModel
+from typing import List, Optional
+from datetime import datetime
 
 # Existing models (keep your current TextRequest and PredictionResponse)
 class TextRequest(BaseModel):
@@ -107,12 +110,23 @@ class TokenData(BaseModel):
 class MessageResponse(BaseModel):
     message: str
     
+class HistoryItem(BaseModel):
+    id: str
+    user_id: str
+    text: str
+    prediction: str
+    confidence: float
+    probabilities: Dict[str, float]
+    analyzed_at: datetime
+    created_at: Optional[datetime] = None
+
 class HistoryResponse(BaseModel):
-    history: List[NewsAnalysisResponse]
+    history: List[HistoryItem]
     total_count: int
-    
+
 class StatsResponse(BaseModel):
     total_analyses: int
     fake_count: int
     real_count: int
+    average_confidence: float
     average_confidence: float

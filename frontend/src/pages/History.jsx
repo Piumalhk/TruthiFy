@@ -120,43 +120,7 @@ export default function History() {
           <hr className="mt-3 mb-0" />
         </div>
       </section>{" "}
-      {/* Stats Section */}
-      {stats && (
-        <section className="stats-section bg-white py-4 border-bottom">
-          <div className="container">
-            <div className="row text-center">
-              <div className="col-md-3">
-                <div className="stat-item">
-                  <h3 className="h4 text-primary mb-1">
-                    {stats.total_analyses}
-                  </h3>
-                  <p className="text-muted mb-0">Total Analyses</p>
-                </div>
-              </div>
-              <div className="col-md-3">
-                <div className="stat-item">
-                  <h3 className="h4 text-success mb-1">{stats.real_count}</h3>
-                  <p className="text-muted mb-0">Real News</p>
-                </div>
-              </div>
-              <div className="col-md-3">
-                <div className="stat-item">
-                  <h3 className="h4 text-danger mb-1">{stats.fake_count}</h3>
-                  <p className="text-muted mb-0">Fake News</p>
-                </div>
-              </div>
-              <div className="col-md-3">
-                <div className="stat-item">
-                  <h3 className="h4 text-info mb-1">
-                    {(stats.average_confidence * 100).toFixed(1)}%
-                  </h3>
-                  <p className="text-muted mb-0">Avg Confidence</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-      )}
+     
       {/* History Content */}
       <section className="history-content">
         <div className="container">
