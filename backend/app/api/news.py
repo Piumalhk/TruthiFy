@@ -4,13 +4,15 @@ from ..models import TextRequest, PredictionResponse, MessageResponse
 from ..services import AnalysisService
 from ..auth import get_current_active_user
 from ..model import FakeNewsModel
+from ..database import get_database
 import logging
 
 logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/news", tags=["News Analysis"])
 
-# Initialize services
-analysis_service = AnalysisService()
+# Dependency injection for AnalysisService
+async def get_analysis_service(db = Depends(get_database)):
+    return AnalysisService(db)
 
 # Initialize model
 try:
@@ -23,7 +25,8 @@ except Exception as e:
 @router.post("/analyze", response_model=PredictionResponse)
 async def analyze_news(
     request: TextRequest, 
-    current_user: dict = Depends(get_current_active_user)
+    current_user: dict = Depends(get_current_active_user),
+    analysis_service: AnalysisService = Depends(get_analysis_service)
 ):
     """Analyze news text for fake news detection"""
     if model is None:

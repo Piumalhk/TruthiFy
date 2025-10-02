@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException
-from ..database import get_database, db
+from ..database import get_database
 import logging
 import psutil
 import os

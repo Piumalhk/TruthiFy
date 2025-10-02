@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.database import connect_to_mongo, close_mongo_connection
-from app.api import auth
+from app.api.routes import api_router   # <-- import your central router
 
 app = FastAPI(title="TruthiFy API")
 
@@ -15,8 +15,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Include routers
-app.include_router(auth.router, prefix="/api/v1")
+# ✅ Include the central router
+app.include_router(api_router)
 
 # Startup & Shutdown events
 @app.on_event("startup")
