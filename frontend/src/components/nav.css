@@ -10,15 +10,14 @@ body {
 
 /* Logo styling */
 .logo {
-  width: 200px;
-  height: 300px;
+  width: 150px;
+  height: 250px;
   object-fit: contain;
-  transition: transform 0.2s ease-in-out;
+  
+ 
 }
 
-.navbar-brand:hover .logo {
-  transform: scale(1.05);
-}
+
 
 /* Navigation hover effects */
 .hover-primary:hover {
@@ -26,9 +25,6 @@ body {
   transition: color 0.3s ease-in-out;
 }
 
-/* Custom navbar styling */
-.navbar {
-}
 
 .navbar-brand:hover {
   text-decoration: none;
@@ -49,9 +45,9 @@ margin-left: 10px;
     height: 75px;
    background: none;
    color: #1b1a1a;
-   width: 1525px;
-   
-   background: linear-gradient(90deg, #d6dae2 0%, #dee1e7 100%)
+   width: full-width;
+   background: linear-gradient(90deg, #d6dae2 0%, #dee1e7 100%);
+  
 
  }
 

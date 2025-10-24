@@ -166,7 +166,7 @@
 }
 
 .news-analysis-section {
-  background: linear-gradient(135deg, #e4e5e7 0%, #334155 100%);
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #334155 100%);
   min-height: calc(100vh - 200px);
   margin-top: -5px;
 }
