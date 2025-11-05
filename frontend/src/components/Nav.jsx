@@ -11,14 +11,12 @@ export default function Nav() {
   const handleAboutClick = (e) => {
     e.preventDefault();
 
-    // If we're already on the home page, just scroll to the about section
     if (location.pathname === "/") {
       const aboutSection = document.getElementById("about-section");
       if (aboutSection) {
         aboutSection.scrollIntoView({ behavior: "smooth" });
       }
     } else {
-      // Navigate to home page first, then scroll to about section
       navigate("/");
       setTimeout(() => {
         const aboutSection = document.getElementById("about-section");
@@ -29,10 +27,20 @@ export default function Nav() {
     }
   };
 
+  // ✅ Handle "Services" click
+  const handleServicesClick = (e) => {
+    e.preventDefault();
+    if (isAuthenticated()) {
+      navigate("/services");
+    } else {
+      alert("Please log in to access the Analysis page.");
+      navigate("/login");
+    }
+  };
+
   return (
-    <nav className="navbar navbar-expand-lg navbar-dark shadow-sm ">
+    <nav className="navbar navbar-expand-lg navbar-dark shadow-sm">
       <div className="container">
-        {" "}
         {/* Logo */}
         <Link className="navbar-brand" to="/">
           <img
@@ -43,7 +51,8 @@ export default function Nav() {
             height="40"
           />
         </Link>
-        {/* Mobile toggle button */}
+
+        {/* Mobile toggle */}
         <button
           className="navbar-toggler"
           type="button"
@@ -55,6 +64,7 @@ export default function Nav() {
         >
           <span className="navbar-toggler-icon"></span>
         </button>
+
         {/* Navigation links */}
         <div
           className="collapse navbar-collapse justify-content-center"
@@ -62,10 +72,11 @@ export default function Nav() {
         >
           <ul className="navbar-nav">
             <li className="nav-item">
-              <a className="nav-link hover-primary px-3" href="/">
+              <Link className="nav-link hover-primary px-3" to="/">
                 Home
-              </a>
-            </li>{" "}
+              </Link>
+            </li>
+
             <li className="nav-item">
               <a
                 className="nav-link hover-primary px-3"
@@ -75,19 +86,27 @@ export default function Nav() {
                 About
               </a>
             </li>
+
+            {/* ✅ Protected Services Tab */}
             <li className="nav-item">
-              <a className="nav-link  hover-primary px-3" href="/services">
+              <a
+                className="nav-link hover-primary px-3"
+                href="/services"
+                onClick={handleServicesClick}
+              >
                 Services
               </a>
             </li>
+
             <li className="nav-item">
-              <a className="nav-link  hover-primary px-3" href="/history">
+              <Link className="nav-link hover-primary px-3" to="/history">
                 History
-              </a>
+              </Link>
             </li>
-          </ul>{" "}
+          </ul>
         </div>
-        {/* Authentication buttons */}
+
+        {/* Authentication Buttons */}
         <div className="d-flex align-items-center gap-2">
           {isAuthenticated() ? (
             <div className="dropdown">
@@ -102,8 +121,7 @@ export default function Nav() {
               <ul className="dropdown-menu dropdown-menu-end">
                 <li>
                   <Link className="dropdown-item" to="/history">
-                    <i className="bi bi-clock-history me-2"></i>
-                    History
+                    <i className="bi bi-clock-history me-2"></i> History
                   </Link>
                 </li>
                 <li>
@@ -114,15 +132,13 @@ export default function Nav() {
                     className="dropdown-item text-danger"
                     onClick={logout}
                   >
-                    <i className="bi bi-box-arrow-right me-2"></i>
-                    Logout
+                    <i className="bi bi-box-arrow-right me-2"></i> Logout
                   </button>
                 </li>
               </ul>
             </div>
           ) : (
             <>
-              
               <Link to="/signup">
                 <button className="btn btn-primary px-4 rounded-pill">
                   Sign Up

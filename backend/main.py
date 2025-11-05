@@ -1,174 +1,74 @@
 # main.py
-from fastapi import FastAPI, Request, HTTPException
+from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
 from model.fake_news_model import load_model
-import json
+from auth import hash_password, verify_password, create_access_token, get_current_user
+from database import users_collection, history_collection
+from schemas import UserCreate, UserLogin, Token, HistoryItem
+from datetime import datetime
+from fastapi.security import OAuth2PasswordRequestForm
+from history import router as history_router
+from fastapi import Depends
 
-# Initialize FastAPI
-app = FastAPI(title="Fake News Detection API", version="2.0")
+app = FastAPI(title="Truthify API")
 
-# Allow CORS for frontend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # You can restrict this to your frontend domain later
+    allow_origins=["*"],  # restrict in production
     allow_credentials=True,
     allow_methods=["*"],
-    allow_headers=["*"],
+    allow_headers=["*"]
 )
 
-# Load the model once at startup
+# Load HF model once
 pipe = load_model()
 
-# Pydantic models for request validation
-class NewsAnalysisRequest(BaseModel):
-    text: str
+# Include history router
+app.include_router(history_router)
 
-@app.get("/")
-def root():
-    return {"message": "Fake News Detection API is running 🚀"}
-
-@app.post("/predict")
-async def predict(request: Request):
-    try:
-        # Try to get JSON data
-        body = await request.body()
-        if not body:
-            raise HTTPException(status_code=400, detail="Request body is empty")
-        
-        try:
-            data = json.loads(body)
-        except json.JSONDecodeError:
-            raise HTTPException(status_code=400, detail="Invalid JSON format")
-        
-        text = data.get("text", "")
-
-        if not text.strip():
-            raise HTTPException(status_code=400, detail="No text provided")
-
-        result = pipe(text)[0]
-        label = result["label"]
-        score = round(result["score"], 3)
-
-        return {
-            "label": label,
-            "confidence": score
-        }
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
-
-# Add the API v1 endpoints that the frontend expects
-@app.post("/api/v1/news/analyze")
-async def analyze_news_authenticated(news_request: NewsAnalysisRequest):
-    """Analyze news for authenticated users"""
-    try:
-        text = news_request.text.strip()
-        if not text:
-            raise HTTPException(status_code=400, detail="No text provided")
-
-        result = pipe(text)[0]
-        label = result["label"]
-        score = round(result["score"], 3)
-
-        # Calculate probabilities for both REAL and FAKE
-        if label == "FAKE":
-            fake_prob = score
-            real_prob = 1 - score
-        else:
-            real_prob = score
-            fake_prob = 1 - score
-
-        return {
-            "prediction": label,
-            "confidence": score,
-            "probabilities": {
-                "REAL": round(real_prob, 3),
-                "FAKE": round(fake_prob, 3)
-            }
-        }
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Analysis failed: {str(e)}")
-
-@app.post("/api/v1/news/analyze-anonymous")
-async def analyze_news_anonymous(news_request: NewsAnalysisRequest):
-    """Analyze news for anonymous users"""
-    try:
-        text = news_request.text.strip()
-        if not text:
-            raise HTTPException(status_code=400, detail="No text provided")
-
-        result = pipe(text)[0]
-        label = result["label"]
-        score = round(result["score"], 3)
-
-        # Calculate probabilities for both REAL and FAKE
-        if label == "FAKE":
-            fake_prob = score
-            real_prob = 1 - score
-        else:
-            real_prob = score
-            fake_prob = 1 - score
-
-        return {
-            "prediction": label,
-            "confidence": score,
-            "probabilities": {
-                "REAL": round(real_prob, 3),
-                "FAKE": round(fake_prob, 3)
-            }
-        }
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Analysis failed: {str(e)}")
-
-# Auth endpoints (stubs - will need proper implementation later)
+# ----------------- Auth Endpoints -----------------
 @app.post("/api/v1/auth/register")
-async def register():
-    return {"message": "Registration endpoint - not implemented yet"}
+async def register(user: UserCreate):
+    if await users_collection.find_one({"username": user.username}):
+        raise HTTPException(status_code=400, detail="User already exists")
+    hashed = hash_password(user.password)
+    await users_collection.insert_one({"username": user.username, "password": hashed})
+    return {"message": "User registered"}
 
-@app.post("/api/v1/auth/login")
-async def login():
-    return {"message": "Login endpoint - not implemented yet"}
+from schemas import UserLogin
+
+@app.post("/api/v1/auth/login", response_model=Token)
+async def login(user: UserLogin):
+    db_user = await users_collection.find_one({"username": user.username})
+    if not db_user or not verify_password(user.password, db_user["password"]):
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+    token = create_access_token({"sub": db_user["username"]})
+    return {"access_token": token, "token_type": "bearer"}
+
+@app.get("/test-db")
+async def test_db():
+    user_count = await users_collection.count_documents({})
+    return {"message": "MongoDB connected successfully!", "total_users": user_count}
 
 @app.get("/api/v1/auth/me")
-async def get_current_user():
-    return {"message": "Current user endpoint - not implemented yet"}
+async def get_me(current_user=Depends(get_current_user)):
+    return {"username": current_user["username"]}
 
-@app.get("/api/v1/auth/profile")
-async def get_profile():
-    return {"message": "Profile endpoint - not implemented yet"}
+# ----------------- Fake News Analysis Endpoint -----------------
+@app.post("/api/v1/analyze")
+async def analyze_news(text: str, current_user=Depends(get_current_user)):
+    result = pipe(text)[0]
+    label = result["label"]
+    confidence = round(result["score"], 3)
+    timestamp = datetime.utcnow()
 
-@app.post("/api/v1/auth/logout")
-async def logout():
-    return {"message": "Logout endpoint - not implemented yet"}
+    # Save to history
+    await history_collection.insert_one({
+        "user_id": current_user["username"],
+        "text": text,
+        "prediction": label,
+        "confidence": confidence,
+        "timestamp": timestamp
+    })
 
-# History endpoints (stubs)
-@app.get("/api/v1/history")
-async def get_history():
-    return {"history": [], "message": "History endpoint - not implemented yet"}
-
-@app.get("/api/v1/history/stats")
-async def get_stats():
-    return {"total_analyses": 0, "fake_count": 0, "real_count": 0, "message": "Stats endpoint - not implemented yet"}
-
-@app.delete("/api/v1/history/{analysis_id}")
-async def delete_analysis(analysis_id: str):
-    return {"message": f"Delete analysis {analysis_id} - not implemented yet"}
-
-@app.delete("/api/v1/history")
-async def clear_history():
-    return {"message": "Clear history endpoint - not implemented yet"}
-
-# System health endpoints
-@app.get("/api/v1/system/health")
-async def health_check():
-    return {"status": "healthy", "message": "API is running"}
-
-@app.get("/api/v1/system/info")
-async def system_info():
-    return {"version": "2.0", "model": "ghanashyamvtatti/roberta-fake-news"}
+    return {"label": label, "confidence": confidence}

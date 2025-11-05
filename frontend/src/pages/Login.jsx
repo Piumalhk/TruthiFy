@@ -57,7 +57,7 @@ export default function Login() {
 
         // Redirect to home page after successful login
         setTimeout(() => {
-          navigate("/");
+          navigate("/analyze");
         }, 1500);
       } else {
         setError(
