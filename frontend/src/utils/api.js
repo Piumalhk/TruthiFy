@@ -76,19 +76,15 @@ export const authAPI = {
 
 // News analysis API functions
 export const newsAPI = {
-  analyzeNews: async (text) => {
-    return apiRequest("/news/analyze", {
-      method: "POST",
-      body: JSON.stringify({ text }),
-    });
+ analyzeNews: async (text) => {
+  return apiRequest("/analyze", {
+    method: "POST",
+    body: JSON.stringify({ content: text }), // 👈 change key name
+  });
+
   },
 
-  analyzeNewsAnonymous: async (text) => {
-    return apiRequest("/news/analyze-anonymous", {
-      method: "POST",
-      body: JSON.stringify({ text }),
-    });
-  },
+
 
   getHistory: async (limit = 50, skip = 0) => {
     return apiRequest(`/history?limit=${limit}&skip=${skip}`);

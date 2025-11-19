@@ -15,7 +15,9 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // ✅ Check if user is authenticated on app load
+  // -------------------------------------------------
+  // ✅ Check authentication on first load
+  // -------------------------------------------------
   useEffect(() => {
     const checkAuth = async () => {
       const token = localStorage.getItem("access_token");
@@ -32,7 +34,6 @@ export const AuthProvider = ({ children }) => {
             const userData = await response.json();
             setUser(userData);
           } else {
-            // Token invalid or expired
             localStorage.removeItem("access_token");
           }
         } catch (error) {
@@ -46,14 +47,9 @@ export const AuthProvider = ({ children }) => {
     checkAuth();
   }, []);
 
-  // ✅ Login: store token and fetch user info
-  const login = async (token, tokenType) => {
-    localStorage.setItem("access_token", token);
-    localStorage.setItem("token_type", tokenType);
-    await fetchUserData();
-  };
-
-  // ✅ Fetch user info from /auth/me
+  // -------------------------------------------------
+  // ✅ Fetch user data after login
+  // -------------------------------------------------
   const fetchUserData = async () => {
     const token = localStorage.getItem("access_token");
     if (!token) return;
@@ -78,18 +74,30 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // ✅ Register new user
+  // -------------------------------------------------
+  // ✅ Login Handler
+  // -------------------------------------------------
+  const login = async (token, tokenType) => {
+    localStorage.setItem("access_token", token);
+    localStorage.setItem("token_type", tokenType);
+    await fetchUserData();
+  };
+
+  // -------------------------------------------------
+  // ✅ Register New User  (Corrected)
+  // -------------------------------------------------
   const register = async (userData) => {
     try {
       const response = await fetch(`${API_BASE_URL}/auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(userData),
+        body: JSON.stringify(userData), // FIXED
       });
 
       const data = await response.json();
+
       return response.ok
-        ? { success: true, message: data.message }
+        ? { success: true, message: data.message || "Account created" }
         : { success: false, message: data.detail || "Registration failed" };
     } catch (error) {
       console.error("Registration error:", error);
@@ -97,20 +105,26 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // -------------------------------------------------
   // ✅ Logout
+  // -------------------------------------------------
   const logout = () => {
     localStorage.removeItem("access_token");
     setUser(null);
   };
 
-  // ✅ Auth helpers
-  const isAuthenticated = () => !!localStorage.getItem("access_token") && !!user;
+  // -------------------------------------------------
+  // Helpers
+  // -------------------------------------------------
+  const isAuthenticated = () =>
+    !!localStorage.getItem("access_token") && !!user;
 
   const getAuthHeaders = () => {
     const token = localStorage.getItem("access_token");
     return token ? { Authorization: `Bearer ${token}` } : {};
   };
 
+  // -------------------------------------------------
   const value = {
     user,
     login,

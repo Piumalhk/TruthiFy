@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import Nav from "../components/Nav";
 import { useAuth } from "../context/AuthContext";
-import { newsAPI } from "../utils/api";
+import axios from "axios";
 
 export default function Newsenter() {
   const { isAuthenticated } = useAuth();
@@ -9,6 +9,7 @@ export default function Newsenter() {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [result, setResult] = useState(null);
   const [error, setError] = useState("");
+
   const handleAnalyze = async () => {
     if (!newsText.trim()) {
       setError("Please enter some news text to analyze");
@@ -18,20 +19,31 @@ export default function Newsenter() {
     setIsAnalyzing(true);
     setError("");
     setResult(null);
+
     try {
-      // Use the appropriate endpoint based on authentication status
-      if (isAuthenticated()) {
-        // Authenticated users - saves to database
-        const data = await newsAPI.analyzeNews(newsText);
-        setResult(data);
-      } else {
-        // Anonymous users - no history saved
-        const data = await newsAPI.analyzeNewsAnonymous(newsText);
-        setResult(data);
+      const token = localStorage.getItem("access_token");
+      if (!token) {
+        setError("You must log in before analyzing news.");
+        setIsAnalyzing(false);
+        return;
       }
+
+      // ✅ Authenticated request to backend
+const response = await axios.post(
+  "http://localhost:8000/api/v1/analyze",
+  { text: newsText },  // <-- FIXED
+  {
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${token}`,
+    },
+  }
+);
+
+      setResult(response.data);
     } catch (err) {
-      setError("Error analyzing news. Please try again.");
       console.error("Analysis error:", err);
+      setError("Error analyzing news. Please try again.");
     } finally {
       setIsAnalyzing(false);
     }
@@ -41,10 +53,6 @@ export default function Newsenter() {
     setNewsText("");
     setResult(null);
     setError("");
-  };
-
-  const getResultColor = (prediction) => {
-    return prediction === "FAKE" ? "text-danger" : "text-success";
   };
 
   const getResultBadgeColor = (prediction) => {
@@ -57,7 +65,7 @@ export default function Newsenter() {
 
       {/* Main Content Section */}
       <section className="news-analysis-section py-5">
-        <div className="container ">
+        <div className="container">
           <div className="row justify-content-center">
             <div className="col-lg-10">
               {/* Input Section */}
@@ -70,10 +78,7 @@ export default function Newsenter() {
                 </div>
                 <div className="card-body p-4">
                   <div className="mb-4">
-                    <label
-                      htmlFor="newsText"
-                      className="form-label fw-semibold"
-                    >
+                    <label htmlFor="newsText" className="form-label fw-semibold">
                       News Article or Content
                     </label>
                     <textarea
@@ -146,41 +151,32 @@ export default function Newsenter() {
                   </div>
                   <div className="card-body p-4">
                     <div className="row">
-                      <div className="col-md-6 mb-4">
-                        <div className="text-center">
-                          <h5 className="fw-bold mb-3">Prediction</h5>
-                          <span
-                            className={`badge ${getResultBadgeColor(
-                              result.prediction
-                            )} fs-4 px-4 py-2`}
-                          >
-                            {result.prediction}
-                          </span>
-                        </div>
+                      <div className="col-md-6 mb-4 text-center">
+                        <h5 className="fw-bold mb-3">Prediction</h5>
+                        <span
+                          className={`badge ${getResultBadgeColor(
+                            result.prediction
+                          )} fs-4 px-4 py-2`}
+                        >
+                          {result.prediction}
+                        </span>
                       </div>
 
-                      <div className="col-md-6 mb-4">
-                        <div className="text-center">
-                          <h5 className="fw-bold mb-3">Confidence Score</h5>
+                      <div className="col-md-6 mb-4 text-center">
+                        <h5 className="fw-bold mb-3">Confidence Score</h5>
+                        <div className="progress mb-2" style={{ height: "25px" }}>
                           <div
-                            className="progress mb-2"
-                            style={{ height: "25px" }}
+                            className={`progress-bar ${
+                              result.prediction === "FAKE"
+                                ? "bg-danger"
+                                : "bg-success"
+                            }`}
+                            role="progressbar"
+                            style={{
+                              width: `${(result.confidence * 100).toFixed(1)}%`,
+                            }}
                           >
-                            <div
-                              className={`progress-bar ${
-                                result.prediction === "FAKE"
-                                  ? "bg-danger"
-                                  : "bg-success"
-                              }`}
-                              role="progressbar"
-                              style={{
-                                width: `${(result.confidence * 100).toFixed(
-                                  1
-                                )}%`,
-                              }}
-                            >
-                              {(result.confidence * 100).toFixed(1)}%
-                            </div>
+                            {(result.confidence * 100).toFixed(1)}%
                           </div>
                         </div>
                       </div>
@@ -197,10 +193,7 @@ export default function Newsenter() {
                                 {(result.probabilities.REAL * 100).toFixed(1)}%
                               </span>
                             </div>
-                            <div
-                              className="progress mb-3"
-                              style={{ height: "8px" }}
-                            >
+                            <div className="progress mb-3" style={{ height: "8px" }}>
                               <div
                                 className="progress-bar bg-success"
                                 style={{
@@ -219,10 +212,7 @@ export default function Newsenter() {
                                 {(result.probabilities.FAKE * 100).toFixed(1)}%
                               </span>
                             </div>
-                            <div
-                              className="progress mb-3"
-                              style={{ height: "8px" }}
-                            >
+                            <div className="progress mb-3" style={{ height: "8px" }}>
                               <div
                                 className="progress-bar bg-danger"
                                 style={{

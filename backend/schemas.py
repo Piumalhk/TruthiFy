@@ -5,7 +5,9 @@ from datetime import datetime
 
 class UserCreate(BaseModel):
     username: str
+    email: str
     password: str
+
 
 class UserLogin(BaseModel):
     username: str
@@ -19,4 +21,7 @@ class HistoryItem(BaseModel):
     text: str
     prediction: str
     confidence: float
-    timestamp: Optional[datetime] = None
+    timestamp: datetime
+
+class AnalyzeRequest(BaseModel):
+    text: str

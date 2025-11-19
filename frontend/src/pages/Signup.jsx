@@ -5,13 +5,15 @@ import { useAuth } from "../context/AuthContext";
 export default function Signup() {
   const navigate = useNavigate();
   const { register } = useAuth();
+
   const [formData, setFormData] = useState({
+    full_name: "",
     username: "",
     email: "",
-    full_name: "",
     password: "",
     confirmPassword: "",
   });
+
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -22,18 +24,19 @@ export default function Signup() {
       ...prev,
       [name]: value,
     }));
-    setError(""); // Clear error when user types
+    setError("");
   };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
     setSuccess("");
 
-    // Validation
+    // ---- Validation ----
     if (
+      !formData.full_name.trim() ||
       !formData.username.trim() ||
       !formData.email.trim() ||
-      !formData.full_name.trim() ||
       !formData.password.trim() ||
       !formData.confirmPassword.trim()
     ) {
@@ -45,6 +48,7 @@ export default function Signup() {
       setError("Passwords do not match");
       return;
     }
+
     if (formData.password.length < 6) {
       setError("Password must be at least 6 characters long");
       return;
@@ -54,38 +58,33 @@ export default function Signup() {
       setError("Password cannot be longer than 72 characters");
       return;
     }
+
     setIsLoading(true);
 
     try {
+      // Send data ONLY what backend expects
       const registrationData = {
         username: formData.username,
         email: formData.email,
-        full_name: formData.full_name,
         password: formData.password,
       };
 
-      const result = await register(registrationData);
+      await register(registrationData);
 
-      if (result.success) {
-        setSuccess("Account created successfully! Redirecting to login...");
-        setFormData({
-          username: "",
-          email: "",
-          full_name: "",
-          password: "",
-          confirmPassword: "",
-        });
+      setSuccess("Account created successfully! Redirecting to login...");
 
-        // Redirect to login page after 2 seconds
-        setTimeout(() => {
-          navigate("/login");
-        }, 2000);
-      } else {
-        setError(result.message);
-      }
+      setFormData({
+        full_name: "",
+        username: "",
+        email: "",
+        password: "",
+        confirmPassword: "",
+      });
+
+      setTimeout(() => navigate("/login"), 1500);
     } catch (error) {
       console.error("Signup error:", error);
-      setError("Network error. Please check your connection and try again.");
+      setError("Registration failed. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -107,20 +106,22 @@ export default function Signup() {
                 <div className="text-center mb-4">
                   <h4 className="fw-bold mb-3">Create Account</h4>
                 </div>
-                {/* Back to Home Button */}
+
                 {/* Error Message */}
                 {error && (
                   <div className="alert alert-danger text-center" role="alert">
                     {error}
                   </div>
                 )}
+
                 {/* Success Message */}
                 {success && (
                   <div className="alert alert-success text-center" role="alert">
                     {success}
                   </div>
                 )}
-                {/* Signup Form */}{" "}
+
+                {/* Signup Form */}
                 <form onSubmit={handleSubmit}>
                   {/* Full Name */}
                   <div className="mb-3">
@@ -135,6 +136,7 @@ export default function Signup() {
                       required
                     />
                   </div>
+
                   {/* Username */}
                   <div className="mb-3">
                     <input
@@ -148,6 +150,7 @@ export default function Signup() {
                       required
                     />
                   </div>
+
                   {/* Email */}
                   <div className="mb-3">
                     <input
@@ -160,7 +163,8 @@ export default function Signup() {
                       placeholder="Enter your email"
                       required
                     />
-                  </div>{" "}
+                  </div>
+
                   {/* Password */}
                   <div className="mb-3">
                     <input
@@ -170,12 +174,12 @@ export default function Signup() {
                       name="password"
                       value={formData.password}
                       onChange={handleInputChange}
-                      placeholder="Enter your password )"
+                      placeholder="Enter your password"
                       required
                       maxLength={72}
                     />
-                    
-                  </div>{" "}
+                  </div>
+
                   {/* Confirm Password */}
                   <div className="mb-3">
                     <input
@@ -190,6 +194,7 @@ export default function Signup() {
                       maxLength={72}
                     />
                   </div>
+
                   {/* Submit Button */}
                   <button
                     type="submit"
@@ -208,8 +213,9 @@ export default function Signup() {
                       "Create Account"
                     )}
                   </button>
+
                   {/* Login Link */}
-                  <div className="text-center ">
+                  <div className="text-center">
                     <p className="text-muted mb-0 fs-6">
                       Already have an account?
                       <Link
@@ -220,11 +226,13 @@ export default function Signup() {
                       </Link>
                     </p>
                   </div>
-                  <div className="text-center ">
+
+                  {/* Back to Home */}
+                  <div className="text-center mt-2">
                     <p className="text-muted mb-0 fs-6">
                       <Link
                         to="/"
-                        className="text-primary text-decoration-none ms-1 "
+                        className="text-primary text-decoration-none ms-1"
                       >
                         Back to Home
                       </Link>

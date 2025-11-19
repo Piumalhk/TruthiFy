@@ -7,10 +7,12 @@ const API_BASE_URL = "http://localhost:8000/api/v1";
 export default function Login() {
   const navigate = useNavigate();
   const { login } = useAuth();
+
   const [formData, setFormData] = useState({
     username: "",
     password: "",
   });
+
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -21,8 +23,9 @@ export default function Login() {
       ...prev,
       [name]: value,
     }));
-    setError(""); // Clear error when user types
+    setError("");
   };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
@@ -48,25 +51,23 @@ export default function Login() {
       });
 
       const data = await response.json();
+
       if (response.ok) {
-        // Use the auth context to handle login
-        login(data.access_token, data.token_type);
+        // Save token via AuthContext
+        await login(data.access_token, data.token_type);
 
         setSuccess("Login successful! Redirecting...");
         setFormData({ username: "", password: "" });
 
-        // Redirect to home page after successful login
         setTimeout(() => {
           navigate("/analyze");
         }, 1500);
       } else {
-        setError(
-          data.detail || "Invalid username or password. Please try again."
-        );
+        setError(data.detail || "Invalid username or password");
       }
     } catch (error) {
       console.error("Login error:", error);
-      setError("Network error. Please check your connection and try again.");
+      setError("Network error. Please check your connection.");
     } finally {
       setIsLoading(false);
     }
@@ -164,17 +165,19 @@ export default function Login() {
                       </Link>
                     </p>
                   </div>
-                  <div className="text-center ">
+
+                  <div className="text-center">
                     <p className="text-muted mb-0 fs-6">
                       <Link
                         to="/"
-                        className="text-primary text-decoration-none ms-1 "
+                        className="text-primary text-decoration-none ms-1"
                       >
                         Back to Home
                       </Link>
                     </p>
                   </div>
                 </form>
+
               </div>
             </div>
           </div>
