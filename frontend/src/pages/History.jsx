@@ -37,11 +37,28 @@ export default function History() {
 
     loadHistoryAndStats();
   }, [isAuthenticated]);
+
   const deleteItem = async (id) => {
     if (window.confirm("Are you sure you want to delete this item?")) {
       try {
         await newsAPI.deleteAnalysis(id);
-        setHistoryItems(historyItems.filter((item) => item.id !== id));
+
+        // Update historyItems state
+        setHistoryItems((prev) => prev.filter((item) => item._id !== id));
+
+        // Update stats
+        if (stats) {
+          const deletedItem = historyItems.find((item) => item._id === id);
+          if (deletedItem) {
+            setStats((prev) => ({
+              total_analyses: prev.total_analyses - 1,
+              fake_count:
+                prev.fake_count - (deletedItem.prediction === "FAKE" ? 1 : 0),
+              real_count:
+                prev.real_count - (deletedItem.prediction === "REAL" ? 1 : 0),
+            }));
+          }
+        }
       } catch (err) {
         console.error("Failed to delete item:", err);
         setError("Failed to delete item. Please try again.");
@@ -93,9 +110,8 @@ export default function History() {
   };
 
   return (
-    <div >
+    <div>
       <Nav />
-  
       {/* Header Section */}
       <section className="history-header bg-light">
         <div className="container">
@@ -121,7 +137,6 @@ export default function History() {
           <hr className="mt-3 mb-0" />
         </div>
       </section>{" "}
-     
       {/* History Content */}
       <section className="history-content">
         <div className="container">
@@ -150,7 +165,7 @@ export default function History() {
                 className="fas fa-history text-muted mb-3"
                 style={{ fontSize: "4rem" }}
               ></i>
-              <h3 className="text-muted mb-3">No Analysis History</h3>
+              <h3 className="text-muted mb-3  ">No Analysis History</h3>
               <p className="text-muted mb-4">
                 You haven't analyzed any news yet. Start by checking some news
                 content!
@@ -187,10 +202,10 @@ export default function History() {
                           <div className="d-flex align-items-center text-muted">
                             <i className="fas fa-calendar me-2"></i>
                             <small className="me-3">
-                              {formatDate(item.analyzed_at)}
+                              {formatDate(item.timestamp)}
                             </small>
                             <i className="fas fa-clock me-2"></i>
-                            <small>{formatTime(item.analyzed_at)}</small>
+                            <small>{formatTime(item.timestamp)}</small>
                           </div>
                         </div>
                         <div className="col-md-4 text-md-end">
@@ -209,7 +224,7 @@ export default function History() {
                             </button>
                             <button
                               className="btn btn-outline-danger btn-sm"
-                              onClick={() => deleteItem(item.id)}
+                              onClick={() => deleteItem(item._id)} // use _id, not id
                             >
                               <i className="fas fa-trash"></i>
                             </button>
